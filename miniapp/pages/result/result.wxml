@@ -1,0 +1,75 @@
+<view class="page {{elderMode ? 'elder' : ''}}">
+  <view wx:if="{{loading}}" class="card state-card fade-in-up">
+    <text class="section-title">正在分析中...</text>
+    <text class="subtitle">正在提取观点、检索证据并生成结论</text>
+  </view>
+
+  <view wx:elif="{{error}}" class="card state-card fade-in-up">
+    <text class="section-title">分析失败</text>
+    <text class="subtitle">{{error}}</text>
+    <button class="btn primary full retry-btn" bindtap="onRetry">重新拉取</button>
+  </view>
+
+  <view wx:else>
+    <view class="card note-card fade-in-up" wx:if="{{result.recognition_note}}">
+      <text class="section-title">识别提示</text>
+      <text class="summary">{{result.recognition_note}}</text>
+    </view>
+
+    <view class="card conclusion-hero fade-in-up">
+      <text class="hero-kicker">核查结论</text>
+      <text class="claim-line">{{topClaim}}</text>
+      <view class="meta-row top-gap">
+        <text class="tag {{result.label}}">{{labelText}}</text>
+        <text class="score">{{result.score}} / 100</text>
+      </view>
+      <view class="progress-track">
+        <view class="progress-bar" style="width: {{progressPercent}}%; background: {{progressColor}};"></view>
+      </view>
+      <text class="summary">{{result.summary}}</text>
+    </view>
+
+    <view class="card fade-in-up">
+      <text class="section-title">关键理由</text>
+      <view wx:for="{{result.reasons}}" wx:key="*this" class="reason-item">
+        <text class="reason-index">{{index + 1}}</text>
+        <text class="reason-content">{{item}}</text>
+      </view>
+    </view>
+
+    <view class="card risk-card fade-in-up" wx:if="{{result.risk_alerts.length > 0}}">
+      <text class="section-title">风险提示</text>
+      <view wx:for="{{result.risk_alerts}}" wx:key="*this" class="risk-item">{{item}}</view>
+    </view>
+
+    <view class="card fade-in-up">
+      <text class="section-title">证据卡片</text>
+      <view wx:for="{{result.evidences}}" wx:key="id" class="evidence-item">
+        <view class="evidence-head">
+          <text class="evidence-title">{{item.title}}</text>
+          <text class="stance {{item.stance}}">{{item.stanceText}}</text>
+        </view>
+        <text class="evidence-meta">来源：{{item.source}} · {{item.publish_time || '未知时间'}}</text>
+        <text class="quote">{{item.quote}}</text>
+        <button wx:if="{{item.url}}" class="evidence-copy" data-url="{{item.url}}" bindtap="onCopySource">
+          复制来源链接
+        </button>
+      </view>
+    </view>
+
+    <view class="card fade-in-up">
+      <text class="section-title">建议怎么做</text>
+      <view wx:for="{{result.next_steps}}" wx:key="*this" class="next-step">{{index + 1}}. {{item}}</view>
+      <text class="disclaimer">{{result.disclaimer}}</text>
+    </view>
+
+    <view class="action-row fade-in-up">
+      <button class="btn primary action-btn" bindtap="onGeneratePoster">生成辟谣卡片</button>
+      <button class="btn secondary action-btn" bindtap="onFeedback">提交纠错</button>
+    </view>
+
+    <button class="btn ghost full fade-in-up" bindtap="onReanalyze">再分析一条</button>
+
+    <canvas canvas-id="shareCanvas" class="hidden-canvas" />
+  </view>
+</view>

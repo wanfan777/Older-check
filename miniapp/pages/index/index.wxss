@@ -1,0 +1,98 @@
+.hero-card {
+  border-radius: 24rpx;
+  background: linear-gradient(140deg, #e8f1ff 0%, #f5f9ff 52%, #ffffff 100%);
+}
+
+.hero-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 14rpx;
+}
+
+.hero-pill {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 52rpx;
+  padding: 0 16rpx;
+  font-size: 22rpx;
+  color: #1d4ed8;
+  background: #dbeafe;
+  border-radius: 999rpx;
+  border: 1rpx solid #bfdbfe;
+}
+
+.input-card {
+  margin-top: 6rpx;
+}
+
+.text-input {
+  min-height: 240rpx;
+  line-height: 1.6;
+}
+
+.media-actions {
+  margin-top: 16rpx;
+  display: flex;
+  gap: 12rpx;
+}
+
+.media-btn {
+  flex: 1;
+}
+
+.preview-wrap {
+  margin-top: 16rpx;
+  padding: 16rpx;
+  border-radius: 12rpx;
+  background: #f8fafc;
+  border: 1rpx solid #e2e8f0;
+}
+
+.preview {
+  margin-top: 10rpx;
+  width: 100%;
+  border-radius: 12rpx;
+}
+
+.submit-btn {
+  margin-top: 18rpx;
+}
+
+.recent-card {
+  margin-bottom: 0;
+}
+
+.record-item {
+  margin-top: 16rpx;
+  padding: 16rpx;
+  border-radius: 12rpx;
+  background: #f8fbff;
+  border: 1rpx solid #e2e8f0;
+}
+
+.record-title {
+  display: block;
+  color: #0f172a;
+  font-size: 28rpx;
+  line-height: 1.5;
+}
+
+.record-meta {
+  margin-top: 12rpx;
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 10rpx;
+}
+
+.record-score {
+  color: #1e293b;
+  font-size: 24rpx;
+}
+
+.record-time {
+  color: #94a3b8;
+  font-size: 24rpx;
+}

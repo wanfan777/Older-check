@@ -1,0 +1,64 @@
+<view class="page {{elderMode ? 'elder' : ''}}">
+  <view class="card hero-card fade-in-up">
+    <view class="hero-head">
+      <text class="hero-pill">上传即分析</text>
+      <text class="link" bindtap="goSettings">设置</text>
+    </view>
+    <text class="title">家庭信息鉴别助手</text>
+    <text class="subtitle">截图或粘贴内容，快速判断可信度并给出证据链</text>
+  </view>
+
+  <view class="card fade-in-up input-card">
+    <text class="section-title">输入内容</text>
+    <text class="section-desc">支持文字与截图联合识别，结论更可靠</text>
+
+    <textarea
+      class="input-shell text-input"
+      placeholder="粘贴短视频文案、群聊转发、文章片段..."
+      maxlength="-1"
+      value="{{text}}"
+      bindinput="onInputText"
+    />
+
+    <view class="media-actions">
+      <button class="btn secondary media-btn" bindtap="onPickImage">选择截图</button>
+      <button class="btn ghost media-btn" bindtap="onClearImage" wx:if="{{imagePath}}">移除截图</button>
+    </view>
+
+    <view wx:if="{{imagePath}}" class="preview-wrap">
+      <text class="helper">已选择截图</text>
+      <image class="preview" src="{{imagePath}}" mode="widthFix" />
+    </view>
+
+    <button class="btn primary full submit-btn" loading="{{analyzing}}" bindtap="onAnalyze">开始分析</button>
+  </view>
+
+  <view class="card fade-in-up recent-card">
+    <view class="section-head">
+      <view>
+        <text class="section-title">最近记录</text>
+        <text class="section-desc" wx:if="{{recentSummary.total > 0}}">
+          共 {{recentSummary.total}} 条 · 可信 {{recentSummary.trusted}} · 不可信 {{recentSummary.untrusted}}
+        </text>
+      </view>
+      <text class="link" bindtap="goHistory">查看全部</text>
+    </view>
+
+    <view wx:if="{{recent.length === 0}}" class="empty">还没有分析记录，先上传一条试试。</view>
+
+    <view
+      wx:for="{{recent}}"
+      wx:key="id"
+      class="record-item"
+      data-id="{{item.id}}"
+      bindtap="openHistoryDetail"
+    >
+      <text class="record-title">{{item.claim}}</text>
+      <view class="record-meta">
+        <text class="tag {{item.label}}">{{item.labelText}}</text>
+        <text class="record-score">{{item.score || 0}}分</text>
+        <text class="record-time">{{item.timeText}}</text>
+      </view>
+    </view>
+  </view>
+</view>

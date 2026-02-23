@@ -1,0 +1,26 @@
+.setting-row {
+  margin-top: 14rpx;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.setting-block {
+  margin-top: 20rpx;
+}
+
+.setting-label {
+  display: block;
+  font-size: 28rpx;
+  color: #0f172a;
+}
+
+.api-input {
+  margin-top: 12rpx;
+  margin-bottom: 16rpx;
+}
+
+.danger-card {
+  background: #fff8f8;
+  border-color: #fecaca;
+}

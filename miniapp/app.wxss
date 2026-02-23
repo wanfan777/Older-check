@@ -1,0 +1,28 @@
+@import "./styles/tokens.wxss";
+
+view,
+text,
+button,
+textarea,
+input {
+  box-sizing: border-box;
+}
+
+button {
+  margin: 0;
+  padding: 0;
+}
+
+button::after {
+  border: 0;
+}
+
+.link {
+  color: #1677ff;
+  font-size: 24rpx;
+  font-weight: 500;
+}
+
+.muted {
+  color: #94a3b8;
+}

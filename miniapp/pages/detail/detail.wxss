@@ -1,0 +1,92 @@
+.overview-card {
+  border-radius: 24rpx;
+  background: linear-gradient(145deg, #eaf2ff 0%, #f7faff 56%, #ffffff 100%);
+}
+
+.top-gap {
+  margin-top: 14rpx;
+}
+
+.score {
+  font-size: 28rpx;
+  color: #334155;
+  font-weight: 600;
+}
+
+.claim {
+  display: block;
+  margin-top: 14rpx;
+  color: #0f172a;
+  line-height: 1.65;
+  font-size: 30rpx;
+  font-weight: 600;
+}
+
+.paragraph {
+  display: block;
+  margin-top: 12rpx;
+  font-size: 28rpx;
+  line-height: 1.72;
+  color: #334155;
+}
+
+.timeline-item {
+  position: relative;
+  margin-top: 16rpx;
+  padding-left: 24rpx;
+}
+
+.timeline-item::before {
+  content: '';
+  position: absolute;
+  left: 8rpx;
+  top: 20rpx;
+  bottom: -14rpx;
+  width: 2rpx;
+  background: #dbeafe;
+}
+
+.timeline-item:last-child::before {
+  display: none;
+}
+
+.timeline-dot {
+  position: absolute;
+  left: 0;
+  top: 14rpx;
+  width: 18rpx;
+  height: 18rpx;
+  border-radius: 999rpx;
+  background: #1677ff;
+  border: 3rpx solid #bfdbfe;
+}
+
+.timeline-body {
+  padding: 14rpx 16rpx;
+  border-radius: 12rpx;
+  background: #f8fbff;
+  border: 1rpx solid #e2e8f0;
+}
+
+.evidence-title {
+  display: block;
+  font-size: 28rpx;
+  line-height: 1.55;
+  color: #0f172a;
+  font-weight: 600;
+}
+
+.evidence-meta {
+  display: block;
+  margin-top: 8rpx;
+  font-size: 24rpx;
+  color: #64748b;
+}
+
+.quote {
+  display: block;
+  margin-top: 8rpx;
+  font-size: 26rpx;
+  line-height: 1.65;
+  color: #334155;
+}

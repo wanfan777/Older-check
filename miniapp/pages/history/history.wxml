@@ -1,0 +1,29 @@
+<view class="page {{elderMode ? 'elder' : ''}}">
+  <view class="card fade-in-up">
+    <text class="section-title">历史记录</text>
+    <text class="section-desc">按关键词和结论状态筛选</text>
+
+    <input class="input-shell search-input" placeholder="输入关键词" value="{{keyword}}" bindinput="onInputKeyword" />
+
+    <view class="chip-group">
+      <view class="chip {{statusFilter === 'all' ? 'active' : ''}}" data-value="all" bindtap="onChangeStatus">全部</view>
+      <view class="chip {{statusFilter === 'trusted' ? 'active' : ''}}" data-value="trusted" bindtap="onChangeStatus">可信</view>
+      <view class="chip {{statusFilter === 'untrusted' ? 'active' : ''}}" data-value="untrusted" bindtap="onChangeStatus">不可信</view>
+      <view class="chip {{statusFilter === 'insufficient' ? 'active' : ''}}" data-value="insufficient" bindtap="onChangeStatus">证据不足</view>
+    </view>
+  </view>
+
+  <view class="card fade-in-up list-card">
+    <text class="section-title">记录列表</text>
+    <view wx:if="{{list.length === 0}}" class="empty">暂无匹配记录，先回首页分析一条。</view>
+
+    <view wx:for="{{list}}" wx:key="id" class="history-item" data-id="{{item.id}}" bindtap="openDetail">
+      <text class="history-claim">{{item.claim}}</text>
+      <view class="history-meta">
+        <text class="tag {{item.label}}">{{item.labelText}}</text>
+        <text class="history-score">{{item.score || 0}}分</text>
+        <text class="history-time">{{item.timeText}}</text>
+      </view>
+    </view>
+  </view>
+</view>
