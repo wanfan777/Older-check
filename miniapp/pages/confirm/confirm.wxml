@@ -1,0 +1,103 @@
+<view class="page {{elderMode ? 'elder' : ''}}">
+  <view wx:if="{{!draftReady}}" class="card">
+    <text class="section-title">正在准备识别内容...</text>
+  </view>
+
+  <view wx:else>
+    <view class="card fade-in-up">
+      <text class="section-title">识别确认</text>
+      <text class="section-desc">先校对文本与主张，再进入分析，结论更稳定。</text>
+
+      <view wx:if="{{imagePath}}" class="preview-wrap mt-8">
+        <view class="meta-row">
+          <text class="helper">当前截图</text>
+          <text class="helper">{{imageMeta}}</text>
+        </view>
+        <image class="preview" src="{{imagePath}}" mode="widthFix" />
+      </view>
+
+      <view wx:if="{{!imagePath}}" class="empty mt-8">未上传图片，当前将基于文字内容分析。</view>
+
+      <view class="row mt-8">
+        <button class="btn secondary w-full" bindtap="onChooseAgain">重新上传</button>
+        <button class="btn ghost w-full" bindtap="onBackEdit">返回修改</button>
+      </view>
+    </view>
+
+    <view class="card fade-in-up">
+      <view class="meta-row">
+        <view>
+          <text class="section-title">OCR 文本</text>
+          <text class="section-desc">支持手动修正错字，建议保留原始语义。</text>
+        </view>
+        <text class="link" bindtap="onRetryOcr">重新识别</text>
+      </view>
+
+      <view wx:if="{{ocrLoading}}" class="mt-8">
+        <view class="skeleton-line"></view>
+        <view class="skeleton-line medium mt-4"></view>
+        <view class="skeleton-line short mt-4"></view>
+      </view>
+
+      <view wx:else>
+        <textarea
+          class="input-shell ocr-textarea"
+          value="{{ocrText}}"
+          maxlength="-1"
+          placeholder="识别文本会显示在这里，可直接编辑..."
+          bindinput="onInputOcrText"
+        />
+
+        <view wx:if="{{recognitionNote}}" class="warn-tip mt-4">{{recognitionNote}}</view>
+        <view wx:if="{{ocrError}}" class="warn-tip mt-4">{{ocrError}}</view>
+      </view>
+    </view>
+
+    <view class="card fade-in-up">
+      <view class="meta-row">
+        <view>
+          <text class="section-title">自动提取主张</text>
+          <text class="section-desc">最多保留 3 条，默认第 1 条作为主要分析对象。</text>
+        </view>
+        <text class="helper">{{claims.length}} / 3</text>
+      </view>
+
+      <view wx:if="{{claims.length > 0}}" class="claim-tabs mt-8">
+        <view
+          wx:for="{{claims}}"
+          wx:key="id"
+          class="claim-tab {{activeClaimIndex === index ? 'active' : ''}}"
+          data-index="{{index}}"
+          bindtap="onSwitchClaim"
+        >
+          主张{{index + 1}}
+        </view>
+      </view>
+
+      <view wx:if="{{claims.length > 0}}" class="claim-editor mt-8">
+        <textarea
+          class="input-shell claim-input"
+          value="{{claims[activeClaimIndex].claim}}"
+          maxlength="-1"
+          data-index="{{activeClaimIndex}}"
+          bindinput="onInputClaim"
+        />
+      </view>
+
+      <view wx:if="{{claims.length === 0}}" class="empty mt-8">暂无可编辑主张，请先补充 OCR 文本。</view>
+
+      <view class="row mt-8">
+        <button class="btn ghost w-full" bindtap="onAddClaim">新增主张</button>
+        <button class="btn ghost w-full" bindtap="onDeleteClaim">删除当前</button>
+      </view>
+    </view>
+
+    <view class="sticky-footer">
+      <view class="card action-card">
+        <button class="btn primary full" loading="{{submitting}}" bindtap="onContinueAnalyze">
+          继续分析
+        </button>
+      </view>
+    </view>
+  </view>
+</view>

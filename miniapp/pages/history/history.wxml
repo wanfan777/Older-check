@@ -1,11 +1,11 @@
 <view class="page {{elderMode ? 'elder' : ''}}">
   <view class="card fade-in-up">
     <text class="section-title">历史记录</text>
-    <text class="section-desc">按关键词和结论状态筛选</text>
+    <text class="section-desc">按关键词和结论状态筛选，可长按或点击删除。</text>
 
-    <input class="input-shell search-input" placeholder="输入关键词" value="{{keyword}}" bindinput="onInputKeyword" />
+    <input class="input-shell" placeholder="搜索主张关键词" value="{{keyword}}" bindinput="onInputKeyword" />
 
-    <view class="chip-group">
+    <view class="chip-group mt-8">
       <view class="chip {{statusFilter === 'all' ? 'active' : ''}}" data-value="all" bindtap="onChangeStatus">全部</view>
       <view class="chip {{statusFilter === 'trusted' ? 'active' : ''}}" data-value="trusted" bindtap="onChangeStatus">可信</view>
       <view class="chip {{statusFilter === 'untrusted' ? 'active' : ''}}" data-value="untrusted" bindtap="onChangeStatus">不可信</view>
@@ -13,16 +13,20 @@
     </view>
   </view>
 
-  <view class="card fade-in-up list-card">
+  <view class="card fade-in-up mb-0">
     <text class="section-title">记录列表</text>
-    <view wx:if="{{list.length === 0}}" class="empty">暂无匹配记录，先回首页分析一条。</view>
 
-    <view wx:for="{{list}}" wx:key="id" class="history-item" data-id="{{item.id}}" bindtap="openDetail">
-      <text class="history-claim">{{item.claim}}</text>
-      <view class="history-meta">
+    <view wx:if="{{list.length === 0}}" class="empty mt-8">暂无匹配记录，先回首页分析一条。</view>
+
+    <view wx:for="{{list}}" wx:key="id" class="history-item" data-id="{{item.id}}" bindtap="openDetail" bindlongpress="onDeleteRecord">
+      <view class="meta-row">
         <text class="tag {{item.label}}">{{item.labelText}}</text>
-        <text class="history-score">{{item.score || 0}}分</text>
-        <text class="history-time">{{item.timeText}}</text>
+        <text class="helper">{{item.timeText}}</text>
+      </view>
+      <text class="history-claim mt-4 hide-overflow-2">{{item.claim}}</text>
+      <view class="row mt-4">
+        <text class="helper">{{item.score || 0}} 分</text>
+        <text class="link" data-id="{{item.id}}" catchtap="onDeleteRecord">删除</text>
       </view>
     </view>
   </view>

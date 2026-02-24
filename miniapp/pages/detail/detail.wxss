@@ -1,38 +1,28 @@
-.overview-card {
-  border-radius: 24rpx;
-  background: linear-gradient(145deg, #eaf2ff 0%, #f7faff 56%, #ffffff 100%);
+.score-text {
+  font-size: var(--font-size-16);
+  line-height: var(--line-height-16);
+  color: var(--color-text-secondary);
+  font-weight: var(--font-semibold);
 }
 
-.top-gap {
-  margin-top: 14rpx;
-}
-
-.score {
-  font-size: 28rpx;
-  color: #334155;
-  font-weight: 600;
-}
-
-.claim {
+.claim-text {
   display: block;
-  margin-top: 14rpx;
-  color: #0f172a;
-  line-height: 1.65;
-  font-size: 30rpx;
-  font-weight: 600;
+  color: var(--color-text-primary);
+  font-size: var(--font-size-16);
+  line-height: var(--line-height-16);
+  font-weight: var(--font-medium);
 }
 
-.paragraph {
-  display: block;
-  margin-top: 12rpx;
-  font-size: 28rpx;
-  line-height: 1.72;
-  color: #334155;
+.reason-line {
+  margin-top: var(--space-4);
+  color: var(--color-text-primary);
+  font-size: var(--font-size-14);
+  line-height: var(--line-height-14);
 }
 
 .timeline-item {
   position: relative;
-  margin-top: 16rpx;
+  margin-top: var(--space-8);
   padding-left: 24rpx;
 }
 
@@ -43,7 +33,7 @@
   top: 20rpx;
   bottom: -14rpx;
   width: 2rpx;
-  background: #dbeafe;
+  background: #d9e6ff;
 }
 
 .timeline-item:last-child::before {
@@ -57,36 +47,35 @@
   width: 18rpx;
   height: 18rpx;
   border-radius: 999rpx;
-  background: #1677ff;
-  border: 3rpx solid #bfdbfe;
+  background: var(--color-primary);
+  border: 3rpx solid #dbe8ff;
 }
 
 .timeline-body {
+  border: 1rpx solid var(--color-border);
+  border-radius: 16rpx;
+  background: #fbfcfe;
   padding: 14rpx 16rpx;
-  border-radius: 12rpx;
-  background: #f8fbff;
-  border: 1rpx solid #e2e8f0;
 }
 
 .evidence-title {
   display: block;
-  font-size: 28rpx;
-  line-height: 1.55;
-  color: #0f172a;
-  font-weight: 600;
+  color: var(--color-text-primary);
+  font-size: var(--font-size-14);
+  line-height: var(--line-height-14);
+  font-weight: var(--font-semibold);
 }
 
 .evidence-meta {
   display: block;
-  margin-top: 8rpx;
-  font-size: 24rpx;
-  color: #64748b;
+  color: var(--color-text-tertiary);
+  font-size: var(--font-size-12);
+  line-height: var(--line-height-12);
 }
 
-.quote {
+.evidence-quote {
   display: block;
-  margin-top: 8rpx;
-  font-size: 26rpx;
-  line-height: 1.65;
-  color: #334155;
+  color: var(--color-text-secondary);
+  font-size: var(--font-size-14);
+  line-height: var(--line-height-14);
 }

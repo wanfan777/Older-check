@@ -62,6 +62,24 @@ function normalizeClaimItem(item, index) {
   };
 }
 
+export function createClaimsFromTexts(claimTexts = []) {
+  if (!Array.isArray(claimTexts)) {
+    return [];
+  }
+
+  return claimTexts
+    .map((claimText, index) =>
+      normalizeClaimItem(
+        {
+          claim: claimText
+        },
+        index
+      )
+    )
+    .filter(Boolean)
+    .slice(0, 3);
+}
+
 function extractClaimsByRule(cleanText) {
   const sentences = splitSentences(cleanText);
   if (!sentences.length) {

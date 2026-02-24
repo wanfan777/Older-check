@@ -1,10 +1,11 @@
-const { getHistoryById, getSettings } = require('../../utils/storage');
+const { getHistoryById, getSettings, saveAnalyzeDraft } = require('../../utils/storage');
 
 Page({
   data: {
     id: '',
     record: null,
-    elderMode: false
+    elderMode: false,
+    reasons: []
   },
 
   onLoad(query) {
@@ -28,7 +29,34 @@ Page({
       : null;
 
     this.setData({
-      record
+      record,
+      reasons: Array.isArray(record?.result?.reasons) ? record.result.reasons.slice(0, 3) : []
+    });
+  },
+
+  onReanalyzeThis() {
+    const { record } = this.data;
+    if (!record) {
+      return;
+    }
+
+    saveAnalyzeDraft({
+      text: String(record.result?.clean_text || record.claim || ''),
+      imagePath: '',
+      imageMime: 'image/jpeg',
+      ocrText: String(record.result?.clean_text || record.claim || ''),
+      claims: Array.isArray(record.result?.claims)
+        ? record.result.claims.map((item) => ({
+            id: item.id,
+            claim: item.claim,
+            topic: item.topic
+          }))
+        : [],
+      activeClaimIndex: 0
+    });
+
+    wx.navigateTo({
+      url: '/pages/confirm/confirm'
     });
   }
 });

@@ -1,7 +1,9 @@
 import 'dotenv/config';
 import cors from 'cors';
 import express from 'express';
+import { extractClaims } from './services/claim.js';
 import { analyzeInput } from './services/analyze.js';
+import { extractText } from './services/ocr.js';
 import { taskStore } from './store/taskStore.js';
 
 const app = express();
@@ -26,10 +28,77 @@ app.get('/health', (_req, res) => {
   });
 });
 
-app.post('/v1/analyze', (req, res) => {
+function normalizeClaims(claimOverridesRaw) {
+  if (!Array.isArray(claimOverridesRaw)) {
+    return [];
+  }
+
+  return claimOverridesRaw
+    .map((item) => String(item || '').trim())
+    .filter(Boolean)
+    .slice(0, 3);
+}
+
+function normalizePrimaryClaimIndex(value) {
+  const parsed = Number(value);
+  if (!Number.isInteger(parsed) || parsed < 0) {
+    return 0;
+  }
+  return parsed;
+}
+
+app.post('/v1/ocr-preview', async (req, res) => {
   const { text = '', image_base64: imageBase64 = '', image_mime: imageMime = '' } = req.body || {};
 
   if (!text && !imageBase64) {
+    return res.status(400).json({
+      error: 'INVALID_INPUT',
+      message: 'text 或 image_base64 至少提供一个'
+    });
+  }
+
+  if (imageBase64 && Buffer.byteLength(imageBase64, 'base64') > 10 * 1024 * 1024) {
+    return res.status(413).json({
+      error: 'IMAGE_TOO_LARGE',
+      message: '图片超过 10MB，请压缩后重试'
+    });
+  }
+
+  try {
+    const ocr = await extractText({
+      text,
+      imageBase64,
+      imageMime
+    });
+    const claims = await extractClaims(ocr.clean_text);
+
+    return res.json({
+      ...ocr,
+      claims
+    });
+  } catch (error) {
+    return res.status(500).json({
+      error: 'OCR_PREVIEW_FAILED',
+      message: error instanceof Error ? error.message : 'OCR 预览失败'
+    });
+  }
+});
+
+app.post('/v1/analyze', (req, res) => {
+  const {
+    text = '',
+    image_base64: imageBase64 = '',
+    image_mime: imageMime = '',
+    clean_text_override: cleanTextOverride = '',
+    claim_overrides: claimOverridesRaw = [],
+    primary_claim_index: primaryClaimIndexRaw = 0
+  } = req.body || {};
+
+  const cleanTextOverrideNormalized = String(cleanTextOverride || '').trim();
+  const claimOverrides = normalizeClaims(claimOverridesRaw);
+  const primaryClaimIndex = normalizePrimaryClaimIndex(primaryClaimIndexRaw);
+
+  if (!text && !imageBase64 && !cleanTextOverrideNormalized) {
     return res.status(400).json({
       error: 'INVALID_INPUT',
       message: 'text 或 image_base64 至少提供一个'
@@ -54,7 +123,10 @@ app.post('/v1/analyze', (req, res) => {
       const result = await analyzeInput({
         text,
         imageBase64,
-        imageMime
+        imageMime,
+        cleanTextOverride: cleanTextOverrideNormalized,
+        claimOverrides,
+        primaryClaimIndex
       });
       taskStore.finishTask(task.id, result);
     } catch (error) {

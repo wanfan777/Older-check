@@ -1,98 +1,75 @@
 .hero-card {
-  border-radius: 24rpx;
-  background: linear-gradient(140deg, #e8f1ff 0%, #f5f9ff 52%, #ffffff 100%);
+  margin-top: 4rpx;
 }
 
 .hero-head {
   display: flex;
-  align-items: center;
+  align-items: flex-start;
   justify-content: space-between;
-  margin-bottom: 14rpx;
+  gap: var(--space-8);
 }
 
-.hero-pill {
+.trust-kicker {
   display: inline-flex;
   align-items: center;
-  justify-content: center;
-  min-height: 52rpx;
-  padding: 0 16rpx;
-  font-size: 22rpx;
-  color: #1d4ed8;
-  background: #dbeafe;
+  min-height: 44rpx;
+  padding: 0 14rpx;
   border-radius: 999rpx;
-  border: 1rpx solid #bfdbfe;
-}
-
-.input-card {
-  margin-top: 6rpx;
+  color: var(--color-primary);
+  background: #edf4ff;
+  border: 1rpx solid #d9e6ff;
+  font-size: var(--font-size-12);
+  font-weight: var(--font-semibold);
 }
 
 .text-input {
-  min-height: 240rpx;
-  line-height: 1.6;
-}
-
-.media-actions {
-  margin-top: 16rpx;
-  display: flex;
-  gap: 12rpx;
-}
-
-.media-btn {
-  flex: 1;
+  min-height: 220rpx;
 }
 
 .preview-wrap {
-  margin-top: 16rpx;
-  padding: 16rpx;
-  border-radius: 12rpx;
-  background: #f8fafc;
-  border: 1rpx solid #e2e8f0;
+  border: 1rpx solid var(--color-border);
+  border-radius: 20rpx;
+  background: #fafcff;
+  padding: var(--space-8);
 }
 
 .preview {
-  margin-top: 10rpx;
   width: 100%;
-  border-radius: 12rpx;
-}
-
-.submit-btn {
-  margin-top: 18rpx;
-}
-
-.recent-card {
-  margin-bottom: 0;
+  margin-top: var(--space-4);
+  border-radius: 16rpx;
 }
 
 .record-item {
-  margin-top: 16rpx;
-  padding: 16rpx;
-  border-radius: 12rpx;
-  background: #f8fbff;
-  border: 1rpx solid #e2e8f0;
+  margin-top: var(--space-8);
+  border: 1rpx solid var(--color-border);
+  border-radius: 20rpx;
+  background: #fbfcfe;
+  padding: var(--space-8);
 }
 
 .record-title {
   display: block;
-  color: #0f172a;
-  font-size: 28rpx;
-  line-height: 1.5;
+  color: var(--color-text-primary);
+  font-size: var(--font-size-14);
+  line-height: var(--line-height-14);
 }
 
-.record-meta {
-  margin-top: 12rpx;
-  display: flex;
-  align-items: center;
+.wrap-row {
   flex-wrap: wrap;
-  gap: 10rpx;
 }
 
-.record-score {
-  color: #1e293b;
-  font-size: 24rpx;
-}
-
-.record-time {
-  color: #94a3b8;
-  font-size: 24rpx;
+.back-top {
+  position: fixed;
+  right: var(--space-12);
+  bottom: calc(120rpx + env(safe-area-inset-bottom));
+  min-height: 72rpx;
+  padding: 0 24rpx;
+  line-height: 72rpx;
+  border-radius: 999rpx;
+  background: #ffffff;
+  border: 1rpx solid var(--color-border);
+  color: var(--color-text-secondary);
+  box-shadow: 0 8rpx 20rpx rgba(15, 23, 42, 0.12);
+  font-size: var(--font-size-12);
+  z-index: 30;
 }

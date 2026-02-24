@@ -36,6 +36,7 @@
 ## 页面能力一览
 
 - `pages/index`：输入文本/上传截图、发起分析、最近记录概览。
+- `pages/confirm`：OCR 识别确认、文本修正、主张编辑与主分析对象选择。
 - `pages/result`：轮询任务、展示结论/理由/证据、生成卡片、提交反馈。
 - `pages/history`：历史列表与筛选。
 - `pages/detail`：历史单条详情与证据时间线。
@@ -43,15 +44,16 @@
 
 ## 核心处理流程
 
-1. 小程序提交文本或图片到 `/v1/analyze`。
-2. 后端创建异步任务并进入分析流水线：
+1. 小程序提交文本或图片到 `/v1/ocr-preview` 做识别确认。
+2. 用户在确认页修正 OCR 文本并调整主张后，再提交 `/v1/analyze`。
+3. 后端创建异步任务并进入分析流水线：
    - 文本提取（OCR/文本清洗）
    - 主张提取（Claim）
    - 证据检索（Retrieval）
    - 评分判定（Scoring）
    - 解释生成（Explainer）
-3. 小程序轮询 `/v1/analyze/:task_id`，拿到最终结果。
-4. 结果页展示并写入本地历史。
+4. 小程序轮询 `/v1/analyze/:task_id`，拿到最终结果。
+5. 结果页展示并写入本地历史。
 
 ## 目录结构
 
@@ -63,6 +65,7 @@
 │   └── src/config/sources.js
 ├── miniapp/                 # 微信小程序前端（原生）
 │   ├── pages/index
+│   ├── pages/confirm
 │   ├── pages/result
 │   ├── pages/history
 │   ├── pages/detail

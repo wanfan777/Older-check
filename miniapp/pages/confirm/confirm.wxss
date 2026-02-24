@@ -1,0 +1,57 @@
+.preview-wrap {
+  border: 1rpx solid var(--color-border);
+  border-radius: 20rpx;
+  background: #fafcff;
+  padding: var(--space-8);
+}
+
+.preview {
+  width: 100%;
+  margin-top: var(--space-4);
+  border-radius: 16rpx;
+}
+
+.ocr-textarea {
+  min-height: 240rpx;
+}
+
+.warn-tip {
+  padding: 12rpx 16rpx;
+  border-radius: 12rpx;
+  color: var(--tag-insufficient-text);
+  background: var(--tag-insufficient-bg);
+  border: 1rpx solid #ffe58f;
+  font-size: var(--font-size-12);
+  line-height: var(--line-height-12);
+}
+
+.claim-tabs {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-8);
+}
+
+.claim-tab {
+  min-height: 64rpx;
+  border-radius: 999rpx;
+  border: 1rpx solid var(--color-border);
+  background: #ffffff;
+  color: var(--color-text-secondary);
+  font-size: var(--font-size-12);
+  line-height: 64rpx;
+  padding: 0 24rpx;
+}
+
+.claim-tab.active {
+  border-color: var(--color-primary);
+  color: #ffffff;
+  background: var(--color-primary);
+}
+
+.claim-input {
+  min-height: 160rpx;
+}
+
+.action-card {
+  margin-bottom: 0;
+}

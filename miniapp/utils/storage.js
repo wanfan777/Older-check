@@ -2,6 +2,7 @@ const { formatTime } = require('./format');
 
 const HISTORY_KEY = 'analysis_history_v1';
 const SETTINGS_KEY = 'app_settings_v1';
+const DRAFT_KEY = 'analysis_draft_v1';
 
 const DEFAULT_SETTINGS = {
   elderMode: false,
@@ -20,6 +21,13 @@ function getHistoryById(id) {
 
 function clearHistory() {
   wx.removeStorageSync(HISTORY_KEY);
+}
+
+function deleteHistoryRecord(id) {
+  const old = getHistory();
+  const next = old.filter((item) => item.id !== id);
+  wx.setStorageSync(HISTORY_KEY, next);
+  return next;
 }
 
 function getLabelText(label) {
@@ -74,11 +82,36 @@ function saveSettings(settings) {
   return merged;
 }
 
+function saveAnalyzeDraft(draft) {
+  const payload = {
+    text: String(draft?.text || ''),
+    imagePath: String(draft?.imagePath || ''),
+    imageMime: String(draft?.imageMime || 'image/jpeg'),
+    ocrText: String(draft?.ocrText || ''),
+    claims: Array.isArray(draft?.claims) ? draft.claims : [],
+    activeClaimIndex: Number.isInteger(draft?.activeClaimIndex) ? draft.activeClaimIndex : 0
+  };
+  wx.setStorageSync(DRAFT_KEY, payload);
+  return payload;
+}
+
+function getAnalyzeDraft() {
+  return wx.getStorageSync(DRAFT_KEY) || null;
+}
+
+function clearAnalyzeDraft() {
+  wx.removeStorageSync(DRAFT_KEY);
+}
+
 module.exports = {
   getHistory,
   getHistoryById,
   clearHistory,
+  deleteHistoryRecord,
   appendHistoryRecord,
   getSettings,
-  saveSettings
+  saveSettings,
+  saveAnalyzeDraft,
+  getAnalyzeDraft,
+  clearAnalyzeDraft
 };

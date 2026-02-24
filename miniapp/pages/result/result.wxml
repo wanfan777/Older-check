@@ -1,75 +1,148 @@
 <view class="page {{elderMode ? 'elder' : ''}}">
-  <view wx:if="{{loading}}" class="card state-card fade-in-up">
-    <text class="section-title">正在分析中...</text>
-    <text class="subtitle">正在提取观点、检索证据并生成结论</text>
+  <view wx:if="{{loading}}" class="card fade-in-up">
+    <text class="section-title">正在分析中</text>
+    <text class="section-desc mt-4">{{loadingHint}}</text>
+    <view wx:if="{{showSkeleton}}" class="mt-8">
+      <view class="skeleton-line"></view>
+      <view class="skeleton-line medium mt-4"></view>
+      <view class="skeleton-line short mt-4"></view>
+      <view class="skeleton-line mt-8"></view>
+      <view class="skeleton-line medium mt-4"></view>
+    </view>
   </view>
 
-  <view wx:elif="{{error}}" class="card state-card fade-in-up">
+  <view wx:elif="{{error}}" class="card fade-in-up">
     <text class="section-title">分析失败</text>
-    <text class="subtitle">{{error}}</text>
-    <button class="btn primary full retry-btn" bindtap="onRetry">重新拉取</button>
+    <text class="section-desc mt-4">{{error}}</text>
+    <button class="btn primary full mt-8" bindtap="onRetry">重试分析</button>
   </view>
 
   <view wx:else>
-    <view class="card note-card fade-in-up" wx:if="{{result.recognition_note}}">
-      <text class="section-title">识别提示</text>
-      <text class="summary">{{result.recognition_note}}</text>
-    </view>
+    <view class="card fade-in-up hero-card">
+      <text class="section-title">结论摘要</text>
+      <text class="claim-title mt-8 hide-overflow-2">{{topClaim}}</text>
 
-    <view class="card conclusion-hero fade-in-up">
-      <text class="hero-kicker">核查结论</text>
-      <text class="claim-line">{{topClaim}}</text>
-      <view class="meta-row top-gap">
+      <text class="link mt-4" bindtap="onToggleOcrRaw">
+        {{showOcrRaw ? '收起原文 OCR' : '展开原文 OCR'}}
+      </text>
+      <view wx:if="{{showOcrRaw}}" class="ocr-raw mt-4">{{result.clean_text || '暂无原文'}}</view>
+
+      <view class="meta-row mt-8">
         <text class="tag {{result.label}}">{{labelText}}</text>
-        <text class="score">{{result.score}} / 100</text>
+        <text class="score-text">{{result.score}} / 100</text>
       </view>
-      <view class="progress-track">
+
+      <view class="progress-track mt-8">
         <view class="progress-bar" style="width: {{progressPercent}}%; background: {{progressColor}};"></view>
       </view>
-      <text class="summary">{{result.summary}}</text>
-    </view>
 
-    <view class="card fade-in-up">
-      <text class="section-title">关键理由</text>
-      <view wx:for="{{result.reasons}}" wx:key="*this" class="reason-item">
-        <text class="reason-index">{{index + 1}}</text>
-        <text class="reason-content">{{item}}</text>
+      <text class="conclusion-line mt-8">{{conclusionLine}}</text>
+
+      <view class="reason-list mt-8">
+        <view wx:for="{{reasonsVisible}}" wx:key="id" class="reason-item">
+          <text class="reason-index">{{index + 1}}</text>
+          <text class="reason-text">{{item.expanded ? item.text : item.shortText}}</text>
+          <text class="link" data-id="{{item.id}}" bindtap="onToggleReason">
+            {{item.expanded ? '收起' : '展开'}}
+          </text>
+        </view>
+      </view>
+
+      <view class="row mt-8" wx:if="{{elderMode && visibleReasonCount < 3 && reasons.length > 2}}">
+        <button class="btn ghost w-full" bindtap="onShowAllReasons">为什么？</button>
+      </view>
+
+      <view class="row mt-8">
+        <button class="btn primary w-full" bindtap="onGeneratePoster">一键分享</button>
+        <button class="btn secondary w-full" bindtap="onGoEvidence">查看证据</button>
       </view>
     </view>
 
-    <view class="card risk-card fade-in-up" wx:if="{{result.risk_alerts.length > 0}}">
+    <view class="card fade-in-up" wx:if="{{result.recognition_note}}">
+      <text class="section-title">识别提示</text>
+      <text class="section-desc mt-4">{{result.recognition_note}}</text>
+      <view class="row mt-8">
+        <button class="btn ghost w-full" bindtap="onRetryOcrFlow">重新裁剪图片</button>
+      </view>
+    </view>
+
+    <view class="card fade-in-up" wx:if="{{result.risk_alerts.length > 0}}">
       <text class="section-title">风险提示</text>
       <view wx:for="{{result.risk_alerts}}" wx:key="*this" class="risk-item">{{item}}</view>
     </view>
 
-    <view class="card fade-in-up">
-      <text class="section-title">证据卡片</text>
-      <view wx:for="{{result.evidences}}" wx:key="id" class="evidence-item">
-        <view class="evidence-head">
-          <text class="evidence-title">{{item.title}}</text>
+    <view class="card fade-in-up" id="evidenceSection">
+      <view class="meta-row">
+        <text class="section-title">证据卡片</text>
+        <text class="helper">默认展示 3 条最强证据</text>
+      </view>
+
+      <view wx:if="{{evidencesVisible.length === 0}}" class="empty mt-8">
+        当前可检索到的权威信息不足，无法支持或反驳该说法。建议补充来源、时间或完整原文。
+      </view>
+
+      <view wx:for="{{evidencesVisible}}" wx:key="uiId" class="evidence-item">
+        <view class="meta-row">
+          <text class="evidence-title hide-overflow-2">{{item.title}}</text>
           <text class="stance {{item.stance}}">{{item.stanceText}}</text>
         </view>
-        <text class="evidence-meta">来源：{{item.source}} · {{item.publish_time || '未知时间'}}</text>
-        <text class="quote">{{item.quote}}</text>
-        <button wx:if="{{item.url}}" class="evidence-copy" data-url="{{item.url}}" bindtap="onCopySource">
+        <text class="evidence-meta mt-4">来源：{{item.source}} · {{item.publish_time || '未知时间'}}</text>
+        <text class="evidence-quote mt-4">{{item.quote}}</text>
+        <button wx:if="{{item.url}}" class="btn ghost mt-8" data-url="{{item.url}}" bindtap="onCopySource">
           复制来源链接
         </button>
       </view>
+
+      <button
+        wx:if="{{evidencesAll.length > 3}}"
+        class="btn secondary full mt-8"
+        bindtap="onToggleEvidence"
+      >
+        {{evidenceExpanded ? '收起更多证据' : '查看更多证据'}}
+      </button>
     </view>
 
     <view class="card fade-in-up">
-      <text class="section-title">建议怎么做</text>
-      <view wx:for="{{result.next_steps}}" wx:key="*this" class="next-step">{{index + 1}}. {{item}}</view>
-      <text class="disclaimer">{{result.disclaimer}}</text>
+      <text class="section-title">下一步建议</text>
+      <view wx:for="{{result.next_steps}}" wx:key="*this" class="step-item">{{index + 1}}. {{item}}</view>
+      <text class="disclaimer mt-8">{{result.disclaimer}}</text>
     </view>
 
-    <view class="action-row fade-in-up">
-      <button class="btn primary action-btn" bindtap="onGeneratePoster">生成辟谣卡片</button>
-      <button class="btn secondary action-btn" bindtap="onFeedback">提交纠错</button>
+    <view class="card fade-in-up mb-0">
+      <view class="row">
+        <button class="btn secondary w-full" bindtap="onOpenFeedback">纠错反馈</button>
+        <button class="btn ghost w-full" bindtap="onReanalyze">再分析一条</button>
+      </view>
     </view>
-
-    <button class="btn ghost full fade-in-up" bindtap="onReanalyze">再分析一条</button>
 
     <canvas canvas-id="shareCanvas" class="hidden-canvas" />
+  </view>
+
+  <view wx:if="{{feedbackVisible}}" class="mask" bindtap="onCloseFeedback" />
+  <view wx:if="{{feedbackVisible}}" class="sheet" catchtap="noop">
+    <text class="section-title">纠错反馈</text>
+    <text class="section-desc mt-4">请选择问题类型，可补充备注。</text>
+
+    <radio-group bindchange="onFeedbackTypeChange" class="mt-8">
+      <label wx:for="{{feedbackOptions}}" wx:key="value" class="feedback-option">
+        <radio value="{{item.value}}" checked="{{feedbackType === item.value}}" color="#1677FF" />
+        <text class="feedback-option-text">{{item.label}}</text>
+      </label>
+    </radio-group>
+
+    <textarea
+      class="input-shell mt-8"
+      maxlength="300"
+      placeholder="可选备注：例如缺失关键时间、来源不准确..."
+      bindinput="onFeedbackCommentInput"
+      value="{{feedbackComment}}"
+    />
+
+    <view class="row mt-8">
+      <button class="btn ghost w-full" bindtap="onCloseFeedback">取消</button>
+      <button class="btn primary w-full" loading="{{feedbackSubmitting}}" bindtap="onSubmitFeedback">
+        提交
+      </button>
+    </view>
   </view>
 </view>

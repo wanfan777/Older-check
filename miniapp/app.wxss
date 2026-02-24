@@ -1,28 +1,23 @@
 @import "./styles/tokens.wxss";
+@import "./styles/components.wxss";
+@import "./styles/utilities.wxss";
 
 view,
 text,
 button,
 textarea,
-input {
+input,
+image,
+scroll-view {
   box-sizing: border-box;
 }
 
 button {
   margin: 0;
   padding: 0;
+  background: transparent;
 }
 
 button::after {
   border: 0;
-}
-
-.link {
-  color: #1677ff;
-  font-size: 24rpx;
-  font-weight: 500;
-}
-
-.muted {
-  color: #94a3b8;
 }

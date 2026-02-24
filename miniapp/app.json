@@ -1,6 +1,7 @@
 {
   "pages": [
     "pages/index/index",
+    "pages/confirm/confirm",
     "pages/result/result",
     "pages/history/history",
     "pages/detail/detail",

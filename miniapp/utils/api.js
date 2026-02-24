@@ -35,6 +35,14 @@ function createAnalyzeTask(payload) {
   });
 }
 
+function previewOcr(payload) {
+  return request({
+    url: '/v1/ocr-preview',
+    method: 'POST',
+    data: payload
+  });
+}
+
 function getAnalyzeTask(taskId) {
   return request({
     url: `/v1/analyze/${taskId}`
@@ -51,6 +59,7 @@ function submitFeedback(payload) {
 
 module.exports = {
   createAnalyzeTask,
+  previewOcr,
   getAnalyzeTask,
   submitFeedback
 };

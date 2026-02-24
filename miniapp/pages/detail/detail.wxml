@@ -1,36 +1,45 @@
 <view class="page {{elderMode ? 'elder' : ''}}">
   <view wx:if="{{!record}}" class="card fade-in-up">
     <text class="section-title">记录不存在</text>
-    <text class="section-desc">可能已被清空，请返回首页重新分析。</text>
+    <text class="section-desc mt-4">可能已被清空，请返回首页重新分析。</text>
   </view>
 
   <view wx:else>
-    <view class="card overview-card fade-in-up">
-      <text class="section-title">主张概览</text>
-      <view class="meta-row top-gap">
+    <view class="card fade-in-up">
+      <text class="section-title">结论概览</text>
+      <view class="meta-row mt-8">
         <text class="tag {{record.label}}">{{record.labelText}}</text>
-        <text class="score">{{record.score}} / 100</text>
+        <text class="score-text">{{record.score}} / 100</text>
       </view>
-      <text class="claim">{{record.claim}}</text>
+      <text class="claim-text mt-8">{{record.claim}}</text>
     </view>
 
-    <view class="card fade-in-up">
-      <text class="section-title">解释</text>
-      <text class="paragraph">{{record.result.explanation}}</text>
+    <view class="card fade-in-up" wx:if="{{reasons.length > 0}}">
+      <text class="section-title">关键理由</text>
+      <view wx:for="{{reasons}}" wx:key="*this" class="reason-line">{{index + 1}}. {{item}}</view>
     </view>
 
     <view class="card fade-in-up">
       <text class="section-title">证据链</text>
-      <view wx:if="{{record.result.evidences.length === 0}}" class="empty">暂无证据记录</view>
+
+      <view wx:if="{{record.result.evidences.length === 0}}" class="empty mt-8">暂无证据记录</view>
 
       <view wx:for="{{record.result.evidences}}" wx:key="id" class="timeline-item">
         <view class="timeline-dot"></view>
         <view class="timeline-body">
           <text class="evidence-title">{{item.title}}</text>
-          <text class="evidence-meta">{{item.source}} · {{item.publish_time || '未知时间'}}</text>
-          <text class="quote">{{item.quote}}</text>
+          <text class="evidence-meta mt-4">{{item.source}} · {{item.publish_time || '未知时间'}}</text>
+          <text class="evidence-quote mt-4">{{item.quote}}</text>
         </view>
       </view>
+    </view>
+
+    <view class="card fade-in-up mb-0">
+      <text class="section-title">免责声明</text>
+      <text class="section-desc mt-4">
+        本工具基于公开信息自动分析，仅提供辅助判断，不构成医疗、法律或投资建议。
+      </text>
+      <button class="btn primary full mt-8" bindtap="onReanalyzeThis">按此内容再分析</button>
     </view>
   </view>
 </view>

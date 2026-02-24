@@ -1,12 +1,53 @@
 import { extractText } from './ocr.js';
-import { extractClaims } from './claim.js';
+import { createClaimsFromTexts, extractClaims } from './claim.js';
 import { retrieveEvidence } from './retrieval.js';
 import { scoreClaims } from './scoring.js';
 import { generateExplanation } from './explainer.js';
 
-export async function analyzeInput({ text = '', imageBase64 = '', imageMime = '' }) {
-  const ocrResult = await extractText({ text, imageBase64, imageMime });
-  const claims = await extractClaims(ocrResult.clean_text);
+function normalizeOverrideText(value = '') {
+  return String(value || '').trim();
+}
+
+function reorderByPrimaryClaim(claims = [], primaryClaimIndex = 0) {
+  const index = Number(primaryClaimIndex);
+  if (!Array.isArray(claims) || claims.length <= 1) {
+    return claims;
+  }
+  if (!Number.isInteger(index) || index <= 0 || index >= claims.length) {
+    return claims;
+  }
+
+  const selected = claims[index];
+  return [selected, ...claims.filter((_item, itemIndex) => itemIndex !== index)].map((item, itemIndex) => ({
+    ...item,
+    id: `c${itemIndex + 1}`
+  }));
+}
+
+export async function analyzeInput({
+  text = '',
+  imageBase64 = '',
+  imageMime = '',
+  cleanTextOverride = '',
+  claimOverrides = [],
+  primaryClaimIndex = 0
+}) {
+  const normalizedOverride = normalizeOverrideText(cleanTextOverride);
+  const ocrResult = normalizedOverride
+    ? {
+        raw_text: normalizedOverride,
+        clean_text: normalizedOverride,
+        language: 'zh-CN',
+        recognition_provider: 'user_confirmed',
+        recognition_note: ''
+      }
+    : await extractText({ text, imageBase64, imageMime });
+
+  let claims = Array.isArray(claimOverrides) && claimOverrides.length
+    ? createClaimsFromTexts(claimOverrides)
+    : await extractClaims(ocrResult.clean_text);
+
+  claims = reorderByPrimaryClaim(claims, primaryClaimIndex);
   const evidence = retrieveEvidence(claims);
   const score = scoreClaims({
     claims,
