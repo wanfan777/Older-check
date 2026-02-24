@@ -1,11 +1,57 @@
-# 家庭信息鉴别小程序（MVP 骨架）
+# 家庭信息鉴别小程序（MVP）
 
-基于你给出的 PRD，当前仓库已实现一个可联调的最小闭环：
+一个给家庭场景使用的“信息真伪初筛”微信小程序。  
+用户上传截图或粘贴文本后，系统会给出三态结论（可信 / 不可信 / 证据不足），并提供证据与行动建议。
 
-1. 小程序端输入截图/文本。
-2. 后端创建分析任务并异步处理。
-3. 轮询任务状态获取结论、证据、解释、建议。
-4. 结果页展示三态结论，并支持历史记录和反馈。
+## 小程序主要功能
+
+### 1) 多模态输入
+- 支持文本输入与图片上传（相册/拍照）。
+- 支持“截图 + 补充文字”联合分析，提高可读性和命中率。
+
+### 2) 自动鉴别与结论输出
+- 自动提取可验证主张（claim）。
+- 给出三态结果：`可信`、`不可信`、`证据不足`。
+- 输出可信度分数（0-100）、一句话摘要、关键理由。
+
+### 3) 证据卡片与风险提示
+- 展示对应证据来源、发布时间、支持/反驳立场、引用摘要。
+- 提供高风险话题提醒（健康、诈骗、金融、政策、公共安全）。
+- 支持一键复制证据来源链接。
+
+### 4) 结果二次操作
+- 生成“辟谣卡片”用于转发说明。
+- 提交纠错反馈（结论不对 / 证据不全 / OCR 识别错误）。
+
+### 5) 历史与详情
+- 自动保存分析历史。
+- 支持按关键词和结论状态筛选历史记录。
+- 支持查看历史详情（结论、解释、证据链）。
+
+### 6) 适老化与联调设置
+- 长辈模式开关。
+- 字体倍率与历史保留天数设置（已存储，后续可进一步联动展示逻辑）。
+- 可配置后端服务地址，便于本地联调。
+
+## 页面能力一览
+
+- `pages/index`：输入文本/上传截图、发起分析、最近记录概览。
+- `pages/result`：轮询任务、展示结论/理由/证据、生成卡片、提交反馈。
+- `pages/history`：历史列表与筛选。
+- `pages/detail`：历史单条详情与证据时间线。
+- `pages/settings`：适老化、服务地址、清空历史。
+
+## 核心处理流程
+
+1. 小程序提交文本或图片到 `/v1/analyze`。
+2. 后端创建异步任务并进入分析流水线：
+   - 文本提取（OCR/文本清洗）
+   - 主张提取（Claim）
+   - 证据检索（Retrieval）
+   - 评分判定（Scoring）
+   - 解释生成（Explainer）
+3. 小程序轮询 `/v1/analyze/:task_id`，拿到最终结果。
+4. 结果页展示并写入本地历史。
 
 ## 目录结构
 
@@ -13,20 +59,23 @@
 .
 ├── api/                     # Node.js 后端
 │   ├── src/server.js        # /v1/analyze, /v1/analyze/:task_id, /v1/feedback
-│   ├── src/services/        # LLM识别/Claim/Retrieval/Scoring/Explainer
+│   ├── src/services/        # OCR/Claim/Retrieval/Scoring/Explainer/LLM Client
 │   └── src/config/sources.js
 ├── miniapp/                 # 微信小程序前端（原生）
-│   ├── pages/index          # 上传与输入
-│   ├── pages/result         # 结果与证据、分享卡片、反馈
-│   ├── pages/history        # 历史记录
-│   ├── pages/detail         # 历史详情
-│   └── pages/settings       # 长辈模式/服务地址/清空记录
+│   ├── pages/index
+│   ├── pages/result
+│   ├── pages/history
+│   ├── pages/detail
+│   └── pages/settings
 └── docs/
     ├── MVP_PRD.md
-    └── API_SPEC.md
+    ├── API_SPEC.md
+    └── WECHAT_DEVTOOLS_SETUP.md
 ```
 
-## 后端启动
+## 本地启动（最短路径）
+
+### 启动后端
 
 ```bash
 cd api
@@ -34,63 +83,31 @@ npm install
 npm run dev
 ```
 
-## 微信开发者工具导入方式（重要）
+默认服务地址：`http://127.0.0.1:3300`
 
-请固定导入 `miniapp/` 目录，不要导入仓库根目录。
+### 导入小程序（重要）
 
-- 正确目录：`/Users/fan/Documents/miniprogram/miniapp`
-- 错误目录：`/Users/fan/Documents/miniprogram`（会出现“在项目根目录未找到 app.json”）
+微信开发者工具请导入：`/Users/fan/Documents/miniprogram/miniapp`  
+不要导入仓库根目录，否则会报 `app.json` 缺失。
 
-如果你之前误导入了根目录，请在微信开发者工具中删除该最近项目，再重新导入 `miniapp/`。
+## LLM 配置（可选但推荐）
 
-详细操作见：`docs/WECHAT_DEVTOOLS_SETUP.md`
-
-## LLM 配置（识别与主张提取）
-
-复制 `api/.env.example` 并设置你的模型配置：
+复制并配置环境变量：
 
 ```bash
 cd api
 cp .env.example .env
 ```
 
-关键环境变量：
+关键项：
+- `LLM_API_KEY`：配置后启用 LLM 优先识别与主张提取。
+- `LLM_BASE_URL`：默认 `https://api.openai.com/v1`。
+- `LLM_MODEL`：默认 `gpt-4.1-mini`。
 
-- `LLM_API_KEY`：必填，未设置时会自动降级到规则识别
-- `LLM_BASE_URL`：默认 `https://api.openai.com/v1`（兼容 OpenAI 协议的网关也可）
-- `LLM_MODEL`：默认 `gpt-4.1-mini`
-- `LLM_ENABLED`：默认 `true`
-- `LLM_TIMEOUT_MS`：默认 `30000`
+未配置时会自动降级为规则模式，不影响基础流程跑通。
 
-默认地址：`http://127.0.0.1:3300`
+## 当前边界（MVP）
 
-如果你需要改端口，可覆盖启动：
-
-```bash
-PORT=3400 npm run dev
-```
-
-健康检查：
-
-```bash
-curl http://127.0.0.1:3300/health
-```
-
-## 小程序联调
-
-1. 用微信开发者工具打开 `miniapp/`。
-2. 在小程序 `设置` 页配置后端地址（默认 `http://127.0.0.1:3300`）。
-3. 在开发者工具中关闭域名校验或把地址加入合法域名。
-
-## 当前实现说明
-
-- 图片识别与 claim 提取采用 LLM 优先策略；若未配置 LLM Key，会自动降级到规则模式。
-- 证据检索、评分、解释为规则+模板版本，便于快速验证流程。
-- 证据源使用示例白名单（`api/src/config/sources.js`），便于后续替换成真实抓取/检索系统。
-
-## 下一步建议
-
-1. 将 `retrieval.js` 接到向量库与白名单索引。
-2. 增加用户体系与持久化数据库，替换当前内存任务存储。
-3. 补充内容安全策略与敏感信息脱敏。
-4. 给高风险话题增加人工复核队列。
+- 任务与反馈存储为内存态，重启后会丢失。
+- 证据源使用示例白名单索引，便于后续替换为真实检索系统。
+- 结果用于辅助判断，不替代医疗、法律、投资等专业意见。
