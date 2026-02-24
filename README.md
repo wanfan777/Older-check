@@ -101,8 +101,20 @@ cp .env.example .env
 
 关键项：
 - `LLM_API_KEY`：配置后启用 LLM 优先识别与主张提取。
-- `LLM_BASE_URL`：默认 `https://api.openai.com/v1`。
-- `LLM_MODEL`：默认 `gpt-4.1-mini`。
+- `LLM_BASE_URL`：兼容 OpenAI 协议网关地址。
+- `LLM_MODEL_TEXT`：文本主张提取模型。
+- `LLM_MODEL_VISION`：图片 OCR 识别模型。
+
+接入 Qwen（DashScope）示例：
+
+```env
+LLM_ENABLED=true
+LLM_API_KEY=你的DashScopeKey
+LLM_BASE_URL=https://dashscope.aliyuncs.com/compatible-mode/v1
+LLM_MODEL_TEXT=qwen-plus-latest
+LLM_MODEL_VISION=qwen-vl-ocr-latest
+LLM_JSON_RESPONSE_FORMAT=true
+```
 
 未配置时会自动降级为规则模式，不影响基础流程跑通。
 

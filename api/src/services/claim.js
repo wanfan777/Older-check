@@ -85,6 +85,7 @@ function extractClaimsByRule(cleanText) {
 
 async function extractClaimsByLlm(cleanText) {
   const parsed = await callLlmJson({
+    modelType: 'text',
     temperature: 0,
     messages: [
       {

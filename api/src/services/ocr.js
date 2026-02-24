@@ -63,6 +63,7 @@ export async function extractText({ text = '', imageBase64 = '', imageMime = '' 
   try {
     const mime = sanitizeImageMime(imageMime);
     const parsed = await callLlmJson({
+      modelType: 'vision',
       temperature: 0,
       messages: [
         {
