@@ -9,6 +9,10 @@ function toTextContent(content) {
     return content;
   }
 
+  if (typeof content === 'object' && typeof content.text === 'string') {
+    return content.text;
+  }
+
   if (!Array.isArray(content)) {
     return '';
   }
@@ -28,6 +32,20 @@ function toTextContent(content) {
     .join('\n');
 }
 
+function normalizeJsonLikeText(raw) {
+  return String(raw || '')
+    .replace(/^\uFEFF/, '')
+    .replace(/[\u200B-\u200D\u2060]/g, '')
+    .replace(/[“”]/g, '"')
+    .replace(/[‘’]/g, "'")
+    .replace(/,\s*([}\]])/g, '$1')
+    .trim();
+}
+
+function tryParseJson(rawText) {
+  return JSON.parse(normalizeJsonLikeText(rawText));
+}
+
 function safeParseJson(rawText) {
   const trimmed = String(rawText || '').trim();
   if (!trimmed) {
@@ -35,17 +53,19 @@ function safeParseJson(rawText) {
   }
 
   try {
-    return JSON.parse(trimmed);
+    return tryParseJson(trimmed);
   } catch (_error) {
     const markdownMatch = trimmed.match(/```(?:json)?\s*([\s\S]*?)\s*```/i);
     if (markdownMatch?.[1]) {
-      return JSON.parse(markdownMatch[1]);
+      try {
+        return tryParseJson(markdownMatch[1]);
+      } catch (_innerError) {}
     }
 
     const firstBrace = trimmed.indexOf('{');
     const lastBrace = trimmed.lastIndexOf('}');
     if (firstBrace >= 0 && lastBrace > firstBrace) {
-      return JSON.parse(trimmed.slice(firstBrace, lastBrace + 1));
+      return tryParseJson(trimmed.slice(firstBrace, lastBrace + 1));
     }
 
     throw new Error('Failed to parse LLM JSON response');
@@ -68,7 +88,7 @@ function getModelName({ modelType, model }) {
   return LLM_CONFIG.textModel;
 }
 
-function createRequestPayload({ model, messages, temperature, useJsonResponseFormat }) {
+function createRequestPayload({ model, messages, temperature, useJsonResponseFormat, maxTokens }) {
   const payload = {
     model,
     temperature,
@@ -79,6 +99,10 @@ function createRequestPayload({ model, messages, temperature, useJsonResponseFor
     payload.response_format = {
       type: 'json_object'
     };
+  }
+
+  if (typeof maxTokens === 'number' && Number.isFinite(maxTokens) && maxTokens > 0) {
+    payload.max_tokens = Math.floor(maxTokens);
   }
 
   return payload;
@@ -99,7 +123,14 @@ function shouldRetryWithoutJsonMode(status, errorText) {
   );
 }
 
-async function requestChatCompletions({ model, messages, temperature, useJsonResponseFormat, signal }) {
+async function requestChatCompletions({
+  model,
+  messages,
+  temperature,
+  useJsonResponseFormat,
+  maxTokens,
+  signal
+}) {
   return fetch(`${LLM_CONFIG.baseUrl}/chat/completions`, {
     method: 'POST',
     headers: {
@@ -111,14 +142,21 @@ async function requestChatCompletions({ model, messages, temperature, useJsonRes
         model,
         messages,
         temperature,
-        useJsonResponseFormat
+        useJsonResponseFormat,
+        maxTokens
       })
     ),
     signal
   });
 }
 
-export async function callLlmJson({ messages, temperature = 0, modelType = 'text', model = '' }) {
+export async function callLlmJson({
+  messages,
+  temperature = 0,
+  modelType = 'text',
+  model = '',
+  maxTokens
+}) {
   if (!isLlmConfigured()) {
     throw new Error('LLM is not configured. Please set LLM_API_KEY.');
   }
@@ -133,6 +171,7 @@ export async function callLlmJson({ messages, temperature = 0, modelType = 'text
       messages,
       temperature,
       useJsonResponseFormat: LLM_CONFIG.jsonResponseFormat,
+      maxTokens,
       signal: controller.signal
     });
 
@@ -144,6 +183,7 @@ export async function callLlmJson({ messages, temperature = 0, modelType = 'text
           messages,
           temperature,
           useJsonResponseFormat: false,
+          maxTokens,
           signal: controller.signal
         });
       } else {

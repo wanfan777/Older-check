@@ -43,6 +43,45 @@ function normalizeRecognitionPayload(payload, fallbackText) {
   };
 }
 
+async function extractByVisionLlm({ text, imageBase64, imageMime, retryMode = false }) {
+  const mime = sanitizeImageMime(imageMime);
+
+  return callLlmJson({
+    modelType: 'vision',
+    temperature: 0,
+    maxTokens: retryMode ? 220 : 320,
+    messages: [
+      {
+        role: 'system',
+        content: retryMode
+          ? '你是OCR助手。只允许输出严格 JSON，且仅包含 raw_text、clean_text、language 三个字段。禁止输出其他字段。'
+          : '你是一个多模态文本识别助手。请从截图中提取全部可读中文文本，并清理噪声（水印、装饰符号、重复空格）。只返回 JSON。'
+      },
+      {
+        role: 'user',
+        content: [
+          {
+            type: 'text',
+            text: retryMode
+              ? '仅返回：{"raw_text":"...","clean_text":"...","language":"zh-CN"}。如果无可读文字，raw_text 和 clean_text 返回空字符串。'
+              : '任务：\n1) 提取截图文字到 raw_text（尽可能完整）\n2) 输出 clean_text（适合后续事实核查）\n3) 标注 language（如 zh-CN）\n如果看不清，不要编造，用[不清晰]标记。\n可选字段：notes。\n\n返回格式：{"raw_text":"...","clean_text":"...","language":"zh-CN"}'
+          },
+          {
+            type: 'text',
+            text: text ? `用户补充文本：${text}` : '用户未补充文本。'
+          },
+          {
+            type: 'image_url',
+            image_url: {
+              url: `data:${mime};base64,${imageBase64}`
+            }
+          }
+        ]
+      }
+    ]
+  });
+}
+
 export async function extractText({ text = '', imageBase64 = '', imageMime = '' }) {
   const hasImage = Boolean(imageBase64);
 
@@ -61,44 +100,28 @@ export async function extractText({ text = '', imageBase64 = '', imageMime = '' 
   }
 
   try {
-    const mime = sanitizeImageMime(imageMime);
-    const parsed = await callLlmJson({
-      modelType: 'vision',
-      temperature: 0,
-      messages: [
-        {
-          role: 'system',
-          content:
-            '你是一个多模态文本识别助手。请从截图中提取全部可读中文文本，并清理噪声（水印、装饰符号、重复空格）。只返回 JSON。'
-        },
-        {
-          role: 'user',
-          content: [
-            {
-              type: 'text',
-              text:
-                '任务：\n1) 提取截图文字到 raw_text（尽可能完整）\n2) 输出 clean_text（适合后续事实核查）\n3) 标注 language（如 zh-CN）\n如果看不清，不要编造，用[不清晰]标记。\n可选字段：notes。\n\n返回格式：{"raw_text":"...","clean_text":"...","language":"zh-CN"}'
-            },
-            {
-              type: 'text',
-              text: text ? `用户补充文本：${text}` : '用户未补充文本。'
-            },
-            {
-              type: 'image_url',
-              image_url: {
-                url: `data:${mime};base64,${imageBase64}`
-              }
-            }
-          ]
-        }
-      ]
+    const parsed = await extractByVisionLlm({
+      text,
+      imageBase64,
+      imageMime,
+      retryMode: false
     });
 
     return normalizeRecognitionPayload(parsed, text);
-  } catch (_error) {
-    return fallbackRecognition({
-      text,
-      hasImage: true
-    });
+  } catch (_firstError) {
+    try {
+      const retried = await extractByVisionLlm({
+        text,
+        imageBase64,
+        imageMime,
+        retryMode: true
+      });
+      return normalizeRecognitionPayload(retried, text);
+    } catch (_secondError) {
+      return fallbackRecognition({
+        text,
+        hasImage: true
+      });
+    }
   }
 }

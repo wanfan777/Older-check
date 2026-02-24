@@ -70,7 +70,8 @@
 └── docs/
     ├── MVP_PRD.md
     ├── API_SPEC.md
-    └── WECHAT_DEVTOOLS_SETUP.md
+    ├── WECHAT_DEVTOOLS_SETUP.md
+    └── OPS_DEPLOYMENT_AND_SECURITY.md
 ```
 
 ## 本地启动（最短路径）
@@ -105,6 +106,10 @@ cp .env.example .env
 - `LLM_MODEL_TEXT`：文本主张提取模型。
 - `LLM_MODEL_VISION`：图片 OCR 识别模型。
 
+推荐固定组合（当前默认）：
+- `LLM_MODEL_TEXT=qwen-plus-latest`
+- `LLM_MODEL_VISION=qwen-vl-ocr-latest`
+
 接入 Qwen（DashScope）示例：
 
 ```env
@@ -117,6 +122,8 @@ LLM_JSON_RESPONSE_FORMAT=true
 ```
 
 未配置时会自动降级为规则模式，不影响基础流程跑通。
+
+部署与密钥管理规范见：`docs/OPS_DEPLOYMENT_AND_SECURITY.md`
 
 ## 当前边界（MVP）
 
